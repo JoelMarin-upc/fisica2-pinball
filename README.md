@@ -1,4 +1,4 @@
-# {Project Name}
+# Pinball
 
 ## Description
 
@@ -17,10 +17,10 @@
 
 ## Developers
 
- - {Dev01} - {Role(s)}
- - {Dev02} - {Role(s)}
- - {Dev03} - {Role(s)}
- - {Dev04} - {Role(s)}
+ - Biel Cadenas Benedicto - {Role(s)}
+ - Pau Gallego Guerrero - {Role(s)}
+ - David Alejandro García Castro - {Role(s)}
+ - Joel Marin Lluset - {Role(s)}
 
 ## License
 

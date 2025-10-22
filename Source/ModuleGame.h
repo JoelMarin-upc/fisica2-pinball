@@ -25,5 +25,6 @@ public:
 
 public:
 	std::vector<PhysicEntity*> entities;
-	
+	Texture2D ball;
+
 };

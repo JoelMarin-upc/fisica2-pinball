@@ -8,7 +8,8 @@
 enum EntityType {
 	BALL,
 	FLIPPER,
-	OBSTACLE
+	OBSTACLE,
+	DEATHZONE
 };
 
 class PhysicEntity
@@ -42,7 +43,7 @@ class Circle : public PhysicEntity
 {
 public:
 	Circle(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type)
-		: PhysicEntity(physics->CreateCircle(_x, _y, 25), _listener, type)
+		: PhysicEntity(physics->CreateCircle(_x, _y, texture.height), _listener, type)
 		, texture(_texture)
 	{
 
@@ -70,7 +71,7 @@ class Box : public PhysicEntity
 {
 public:
 	Box(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type)
-		: PhysicEntity(physics->CreateRectangle(_x, _y, 100, 50), _listener, type)
+		: PhysicEntity(physics->CreateRectangle(_x, _y, texture.width, texture.height), _listener, type)
 		, texture(_texture)
 	{
 
@@ -92,6 +93,29 @@ public:
 
 private:
 	Texture2D texture;
+
+};
+
+class BoxSensor : public PhysicEntity
+{
+public:
+	BoxSensor(ModulePhysics* physics, int _x, int _y, int width, int height, Module* _listener, EntityType type)
+		: PhysicEntity(physics->CreateRectangleSensor(_x, _y, width, height), _listener, type)
+	{
+
+	}
+
+	void Update() override
+	{
+
+	}
+
+	int RayHit(vec2<int> ray, vec2<int> mouse, vec2<float>& normal) override
+	{
+		return body->RayCast(ray.x, ray.y, mouse.x, mouse.y, normal.x, normal.y);;
+	}
+
+private:
 
 };
 
@@ -129,6 +153,9 @@ bool ModuleGame::Start()
 	LOG("Loading Intro assets");
 	bool ret = true;
 
+	ball = LoadTexture("Assets/wheel.png");
+	entities.emplace_back(new BoxSensor(App->physics, 0, GetScreenHeight() - 50, GetScreenWidth(), 500, this, EntityType::DEATHZONE));
+
 	return ret;
 }
 
@@ -143,6 +170,10 @@ bool ModuleGame::CleanUp()
 // Update: draw background
 update_status ModuleGame::Update()
 {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		entities.emplace_back(new Ball(App->physics, GetMouseX(), GetMouseY(), this, ball));
+	}
+
 	for (PhysicEntity* entity : entities)
 	{
 		entity->Update();
@@ -153,5 +184,5 @@ update_status ModuleGame::Update()
 
 void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
-
+	// if ball collides with deathzone -> lose
 }

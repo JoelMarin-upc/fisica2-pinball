@@ -5,13 +5,123 @@
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
 
+enum EntityType {
+	BALL,
+	FLIPPER,
+	OBSTACLE
+};
+
+class PhysicEntity
+{
+protected:
+
+	PhysicEntity(PhysBody* _body, Module* _listener, EntityType type)
+		: body(_body)
+		, listener(_listener)
+		, type(type)
+	{
+
+	}
+
+public:
+	virtual ~PhysicEntity() = default;
+	virtual void Update() = 0;
+
+	virtual int RayHit(vec2<int> ray, vec2<int> mouse, vec2<float>& normal)
+	{
+		return 0;
+	}
+
+protected:
+	PhysBody* body;
+	Module* listener;
+	EntityType type;
+};
+
+class Circle : public PhysicEntity
+{
+public:
+	Circle(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type)
+		: PhysicEntity(physics->CreateCircle(_x, _y, 25), _listener, type)
+		, texture(_texture)
+	{
+
+	}
+
+	void Update() override
+	{
+		int x, y;
+		body->GetPhysicPosition(x, y);
+		Vector2 position{ (float)x, (float)y };
+		float scale = 1.0f;
+		Rectangle source = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+		Rectangle dest = { position.x, position.y, (float)texture.width * scale, (float)texture.height * scale };
+		Vector2 origin = { (float)texture.width / 2.0f, (float)texture.height / 2.0f };
+		float rotation = body->GetRotation() * RAD2DEG;
+		DrawTexturePro(texture, source, dest, origin, rotation, WHITE);
+	}
+
+private:
+	Texture2D texture;
+
+};
+
+class Box : public PhysicEntity
+{
+public:
+	Box(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type)
+		: PhysicEntity(physics->CreateRectangle(_x, _y, 100, 50), _listener, type)
+		, texture(_texture)
+	{
+
+	}
+
+	void Update() override
+	{
+		int x, y;
+		body->GetPhysicPosition(x, y);
+		DrawTexturePro(texture, Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
+			Rectangle{ (float)x, (float)y, (float)texture.width, (float)texture.height },
+			Vector2{ (float)texture.width / 2.0f, (float)texture.height / 2.0f }, body->GetRotation() * RAD2DEG, WHITE);
+	}
+
+	int RayHit(vec2<int> ray, vec2<int> mouse, vec2<float>& normal) override
+	{
+		return body->RayCast(ray.x, ray.y, mouse.x, mouse.y, normal.x, normal.y);;
+	}
+
+private:
+	Texture2D texture;
+
+};
+
+class Ball : public Circle
+{
+public:
+	Ball(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture)
+		: Circle(physics, _x, _y, _listener, _texture, EntityType::BALL)
+	{
+
+	}
+
+	/*void Update() override
+	{
+		
+	}*/
+
+private:
+
+};
+
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	
 }
 
 ModuleGame::~ModuleGame()
-{}
+{
+
+}
 
 // Load assets
 bool ModuleGame::Start()
@@ -33,5 +143,15 @@ bool ModuleGame::CleanUp()
 // Update: draw background
 update_status ModuleGame::Update()
 {
+	for (PhysicEntity* entity : entities)
+	{
+		entity->Update();
+	}
+
 	return UPDATE_CONTINUE;
+}
+
+void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
+{
+
 }

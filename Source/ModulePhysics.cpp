@@ -2,9 +2,8 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
-
 #include "p2Point.h"
-
+#include <iostream>
 #include <math.h>
 
 
@@ -53,6 +52,8 @@ update_status ModulePhysics::PreUpdate()
 		}
 	}
 
+	CleanUpDestructionQueue();
+
 	return UPDATE_CONTINUE;
 }
 
@@ -64,7 +65,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 
 	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
-	b->GetUserData().pointer = (uintptr_t)pbody;
+	b->GetUserData().pointer = reinterpret_cast<uintptr_t>(pbody);
 
 	b2CircleShape shape;
 	shape.m_radius = PIXEL_TO_METERS(radius);
@@ -75,7 +76,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 	b->CreateFixture(&fixture);
 
 	pbody->body = b;
-	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
+	//body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = pbody->height = radius;
 
 	return pbody;
@@ -89,7 +90,7 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 
 	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
-	b->GetUserData().pointer = (uintptr_t)pbody;
+	b->GetUserData().pointer = reinterpret_cast<uintptr_t>(pbody);
 
 	b2PolygonShape box;
 	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
@@ -101,7 +102,7 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 	b->CreateFixture(&fixture);
 
 	pbody->body = b;
-	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
+	//body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = (int)(width * 0.5f);
 	pbody->height = (int)(height * 0.5f);
 
@@ -116,7 +117,7 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	
 	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
-	b->GetUserData().pointer = (uintptr_t)pbody;
+	b->GetUserData().pointer = reinterpret_cast<uintptr_t>(pbody);
 
 	b2PolygonShape box;
 	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
@@ -129,7 +130,7 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	b->CreateFixture(&fixture);
 
 	pbody->body = b;
-	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
+	//body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = width;
 	pbody->height = height;
 
@@ -144,7 +145,7 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 
 	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
-	b->GetUserData().pointer = (uintptr_t)pbody;
+	b->GetUserData().pointer = reinterpret_cast<uintptr_t>(pbody);
 
 	b2ChainShape shape;
 	b2Vec2* p = new b2Vec2[size / 2];
@@ -165,7 +166,7 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 	delete p;
 
 	pbody->body = b;
-	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
+	//body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = pbody->height = 0;
 
 	return pbody;
@@ -173,8 +174,21 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 
 void ModulePhysics::DestroyBody(b2Body* body)
 {
-	world->DestroyBody(body);
-	body = nullptr;
+	if (body) bodiesToDestroy.push_back(body);
+}
+
+void ModulePhysics::CleanUpDestructionQueue()
+{
+	for (b2Body* body : bodiesToDestroy) {
+		if (body) {
+			auto pbody = (PhysBody*)body->GetUserData().pointer;
+			delete pbody;
+			body->GetUserData().pointer = 0;
+			world->DestroyBody(body);
+			std::cout << "object destroyed" << std::endl;
+		}
+	}
+	bodiesToDestroy.clear();
 }
 
 // 

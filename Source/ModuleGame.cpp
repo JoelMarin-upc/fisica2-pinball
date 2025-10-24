@@ -4,7 +4,6 @@
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
-#include "../EntityType.cpp"
 
 class PhysicEntity
 {
@@ -16,7 +15,7 @@ protected:
 		, listener(_listener)
 		, type(type)
 	{
-		
+		body->listener = listener;
 	}
 
 public:
@@ -130,9 +129,10 @@ public:
 	}*/
 
 	~Ball() {
-		physics->DestroyBody(body->body);
-		delete body;
-		if (body) body = nullptr;
+		auto pbody = body->body;
+		/*delete body;
+		if (body) body = nullptr;*/
+		physics->DestroyBody(pbody);
 	}
 
 private:

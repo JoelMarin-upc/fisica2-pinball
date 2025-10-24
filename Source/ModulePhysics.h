@@ -2,7 +2,7 @@
 
 #include "Module.h"
 #include "Globals.h"
-#include "../EntityType.cpp"
+#include <vector>
 
 #include "box2d\box2d.h"
 
@@ -65,11 +65,12 @@ public:
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);
 
-	
+	void CleanUpDestructionQueue();
 
 private:
 
 	bool debug;
 	b2World* world;
 	b2Body* ground;
+	std::vector<b2Body*> bodiesToDestroy;
 };

@@ -192,6 +192,7 @@
     <ClInclude Include="Source\Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EntityType.cpp" />
     <ClCompile Include="Source/Application.cpp" />
     <ClCompile Include="Source/Log.cpp" />
     <ClCompile Include="Source/Main.cpp" />

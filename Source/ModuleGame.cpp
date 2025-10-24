@@ -4,24 +4,19 @@
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
-
-enum EntityType {
-	BALL,
-	FLIPPER,
-	OBSTACLE,
-	DEATHZONE
-};
+#include "../EntityType.cpp"
 
 class PhysicEntity
 {
 protected:
 
-	PhysicEntity(PhysBody* _body, Module* _listener, EntityType type)
+	PhysicEntity(PhysBody* _body, ModulePhysics* _physics, Module* _listener, EntityType type)
 		: body(_body)
+		, physics(_physics)
 		, listener(_listener)
 		, type(type)
 	{
-
+		
 	}
 
 public:
@@ -37,16 +32,17 @@ protected:
 	PhysBody* body;
 	Module* listener;
 	EntityType type;
+	ModulePhysics* physics;
 };
 
 class Circle : public PhysicEntity
 {
 public:
 	Circle(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type)
-		: PhysicEntity(physics->CreateCircle(_x, _y, texture.height), _listener, type)
+		: PhysicEntity(physics->CreateCircle(_x, _y, _texture.height), physics, _listener, type)
 		, texture(_texture)
 	{
-
+		body->type = type;
 	}
 
 	void Update() override
@@ -71,10 +67,10 @@ class Box : public PhysicEntity
 {
 public:
 	Box(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type)
-		: PhysicEntity(physics->CreateRectangle(_x, _y, texture.width, texture.height), _listener, type)
+		: PhysicEntity(physics->CreateRectangle(_x, _y, _texture.width, _texture.height), physics, _listener, type)
 		, texture(_texture)
 	{
-
+		body->type = type;
 	}
 
 	void Update() override
@@ -100,9 +96,9 @@ class BoxSensor : public PhysicEntity
 {
 public:
 	BoxSensor(ModulePhysics* physics, int _x, int _y, int width, int height, Module* _listener, EntityType type)
-		: PhysicEntity(physics->CreateRectangleSensor(_x, _y, width, height), _listener, type)
+		: PhysicEntity(physics->CreateRectangleSensor(_x, _y, width, height), physics, _listener, type)
 	{
-
+		body->type = type;
 	}
 
 	void Update() override
@@ -125,7 +121,7 @@ public:
 	Ball(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture)
 		: Circle(physics, _x, _y, _listener, _texture, EntityType::BALL)
 	{
-
+		
 	}
 
 	/*void Update() override
@@ -133,8 +129,14 @@ public:
 		
 	}*/
 
-private:
+	~Ball() {
+		physics->DestroyBody(body->body);
+		delete body;
+		if (body) body = nullptr;
+	}
 
+private:
+	
 };
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
@@ -154,7 +156,7 @@ bool ModuleGame::Start()
 	bool ret = true;
 
 	ball = LoadTexture("Assets/wheel.png");
-	entities.emplace_back(new BoxSensor(App->physics, 0, GetScreenHeight() - 50, GetScreenWidth(), 500, this, EntityType::DEATHZONE));
+	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight(), GetScreenWidth(), 500, this, EntityType::DEATHZONE));
 
 	return ret;
 }
@@ -171,7 +173,7 @@ bool ModuleGame::CleanUp()
 update_status ModuleGame::Update()
 {
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		entities.emplace_back(new Ball(App->physics, GetMouseX(), GetMouseY(), this, ball));
+		balls.emplace_back(new Ball(App->physics, GetMouseX(), GetMouseY(), this, ball));
 	}
 
 	for (PhysicEntity* entity : entities)
@@ -179,10 +181,18 @@ update_status ModuleGame::Update()
 		entity->Update();
 	}
 
+	for (Ball* b : balls)
+	{
+		b->Update();
+	}
+
 	return UPDATE_CONTINUE;
 }
 
 void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
-	// if ball collides with deathzone -> lose
+	if (bodyA->type == EntityType::BALL && bodyB->type == EntityType::DEATHZONE) {
+		delete balls[currentBall];
+		balls.erase(balls.begin());
+	}
 }

@@ -2,6 +2,7 @@
 
 #include "Module.h"
 #include "Globals.h"
+#include "../EntityType.cpp"
 
 #include "box2d\box2d.h"
 
@@ -13,6 +14,13 @@
 
 #define METERS_TO_PIXELS(m) ((int) floor(PIXELS_PER_METER * m))
 #define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
+
+enum EntityType {
+	BALL,
+	FLIPPER,
+	OBSTACLE,
+	DEATHZONE
+};
 
 // Small class to return to other modules to track position and rotation of physics bodies
 class PhysBody
@@ -32,6 +40,7 @@ public:
 	int width, height;
 	b2Body* body;
 	Module* listener;
+	EntityType type;
 };
 
 // Module --------------------------------------
@@ -50,6 +59,8 @@ public:
 	PhysBody* CreateRectangle(int x, int y, int width, int height);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height);
 	PhysBody* CreateChain(int x, int y, const int* points, int size);
+	
+	void DestroyBody(b2Body* body);
 
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);

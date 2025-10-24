@@ -62,7 +62,9 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 	body.type = b2_dynamicBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
+	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
+	b->GetUserData().pointer = (uintptr_t)pbody;
 
 	b2CircleShape shape;
 	shape.m_radius = PIXEL_TO_METERS(radius);
@@ -72,7 +74,6 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 
 	b->CreateFixture(&fixture);
 
-	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = pbody->height = radius;
@@ -86,7 +87,10 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 	body.type = b2_dynamicBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
+	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
+	b->GetUserData().pointer = (uintptr_t)pbody;
+
 	b2PolygonShape box;
 	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
 
@@ -96,7 +100,6 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 
 	b->CreateFixture(&fixture);
 
-	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = (int)(width * 0.5f);
@@ -110,8 +113,10 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	b2BodyDef body;
 	body.type = b2_staticBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-
+	
+	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
+	b->GetUserData().pointer = (uintptr_t)pbody;
 
 	b2PolygonShape box;
 	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
@@ -123,7 +128,6 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 
 	b->CreateFixture(&fixture);
 
-	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = width;
@@ -138,7 +142,9 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 	body.type = b2_dynamicBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
+	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
+	b->GetUserData().pointer = (uintptr_t)pbody;
 
 	b2ChainShape shape;
 	b2Vec2* p = new b2Vec2[size / 2];
@@ -158,12 +164,17 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 
 	delete p;
 
-	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	pbody->width = pbody->height = 0;
 
 	return pbody;
+}
+
+void ModulePhysics::DestroyBody(b2Body* body)
+{
+	world->DestroyBody(body);
+	body = nullptr;
 }
 
 // 
@@ -183,7 +194,7 @@ update_status ModulePhysics::PostUpdate()
 
 	// Bonus code: this will iterate all objects in the world and draw the circles
 	// You need to provide your own macro to translate meters to pixels
-	/*for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
+	for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
 	{
 		for(b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
 		{
@@ -195,7 +206,7 @@ update_status ModulePhysics::PostUpdate()
 					b2CircleShape* shape = (b2CircleShape*)f->GetShape();
 					b2Vec2 pos = f->GetBody()->GetPosition();
 					
-					DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), (float)METERS_TO_PIXELS(shape->m_radius), Color{0, 0, 0, 128});
+					DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), (float)METERS_TO_PIXELS(shape->m_radius), RED);
 				}
 				break;
 

@@ -62,6 +62,7 @@ public:
 	PhysBody* CreateRectangle(int x, int y, int width, int height, float angle = 0.f, bool dynamic = true);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height, float angle = 0.f, bool dynamic = true);
 	PhysBody* CreateChain(int x, int y, const int* points, int size, float angle = 0.f, bool dynamic = true);
+	void CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int yAnchor, float lowerAngle, float upperAngle);
 	
 	void DestroyBody(b2Body* body);
 

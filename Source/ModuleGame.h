@@ -11,6 +11,7 @@
 class PhysBody;
 class PhysicEntity;
 class Ball;
+class Flipper;
 
 
 class ModuleGame : public Module
@@ -31,9 +32,15 @@ public:
 	std::vector<PhysicEntity*> entities;
 	std::vector<Ball*> balls;
 	int currentBall = 0;
-	Texture2D ball;
-	Texture2D wall_hor;
-	Texture2D wall_ver;
 	bool ballLaunched = false;
+	
+	Flipper* flipperLeft;
+	Flipper* flipperRight;
+
+	Texture2D ball_t;
+	Texture2D wall_hor_t;
+	Texture2D wall_ver_t;
+	Texture2D flipper_left_t;
+	Texture2D flipper_right_t;
 
 };

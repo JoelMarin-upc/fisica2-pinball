@@ -77,7 +77,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, boo
 
 	pbody->body = b;
 	//body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
-	pbody->width = pbody->height = radius;
+	pbody->width = pbody->height = radius * 2;
 
 	b2Transform transform = b->GetTransform();
 	b->SetTransform(transform.p, DEGREES_TO_RADIANS(angle));
@@ -106,8 +106,8 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, fl
 
 	pbody->body = b;
 	//body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
-	pbody->width = (int)(width * 0.5f);
-	pbody->height = (int)(height * 0.5f);
+	pbody->width = width;
+	pbody->height = height;
 
 	b2Transform transform = b->GetTransform();
 	b->SetTransform(transform.p, DEGREES_TO_RADIANS(angle));
@@ -182,6 +182,17 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, 
 	b->SetTransform(transform.p, DEGREES_TO_RADIANS(angle));
 
 	return pbody;
+}
+
+void ModulePhysics::CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int yAnchor, float lowerAngle, float upperAngle)
+{
+	b2RevoluteJointDef jointDef;
+	jointDef.Initialize(b1, b2, b2Vec2(PIXEL_TO_METERS(xAnchor), PIXEL_TO_METERS(yAnchor)));
+	jointDef.enableLimit = true;
+	jointDef.lowerAngle = DEGREES_TO_RADIANS(lowerAngle);
+	jointDef.upperAngle = DEGREES_TO_RADIANS(upperAngle);
+	jointDef.collideConnected = false;
+	world->CreateJoint(&jointDef);
 }
 
 void ModulePhysics::DestroyBody(b2Body* body)

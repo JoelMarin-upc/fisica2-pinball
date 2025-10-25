@@ -140,6 +140,33 @@ public:
 
 };
 
+class Flipper : public Box
+{
+public:
+	Flipper(ModulePhysics* physics, Module* _listener, Texture2D _texture, PhysicEntity* attachTo, b2Vec2 anchorPoint, bool left)
+		: Box(physics, anchorPoint.x + ((left ? 1 : -1) * (_texture.width / 2)), anchorPoint.y, _listener, _texture, EntityType::FLIPPER)
+	{
+		float lowerAngle, upperAngle;
+		if (left) {
+			lowerAngle = -30;
+			upperAngle = 30;
+		}
+		else {
+			lowerAngle = -30;
+			upperAngle = 30;
+		}
+		physics->CreateRevoluteJoint(body->body, attachTo->body->body, anchorPoint.x, anchorPoint.y, lowerAngle, upperAngle);
+	}
+
+	/*void Update() override
+	{
+
+	}*/
+
+public:
+
+};
+
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	
@@ -156,9 +183,11 @@ bool ModuleGame::Start()
 	LOG("Loading Intro assets");
 	bool ret = true;
 
-	ball = LoadTexture("Assets/wheel.png");
-	wall_ver = LoadTexture("Assets/wall_vertical.png");
-	wall_hor = LoadTexture("Assets/wall_horizontal.png");
+	ball_t = LoadTexture("Assets/wheel.png");
+	wall_ver_t = LoadTexture("Assets/wall_vertical.png");
+	wall_hor_t = LoadTexture("Assets/wall_horizontal.png");
+	flipper_left_t = LoadTexture("Assets/flipper_left.png");
+	flipper_right_t = LoadTexture("Assets/flipper_right.png");
 	CreateMap();
 	AddBalls(3);
 
@@ -179,6 +208,14 @@ update_status ModuleGame::Update()
 	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
 		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f - currentBall);
 		ballLaunched = true;
+	}
+
+	if (IsKeyDown(KEY_LEFT)) {
+		flipperLeft->body->ApplyImpulse(0.f, -10.f);
+	}
+
+	if (IsKeyDown(KEY_RIGHT)) {
+		flipperRight->body->ApplyImpulse(0.f, -10.f);
 	}
 
 	for (PhysicEntity* entity : entities)
@@ -207,13 +244,30 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 void ModuleGame::CreateMap()
 {
 	// deathzone
-	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight(), GetScreenWidth(), 100, this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight() + 150, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
 	
 	// walls
-	entities.emplace_back(new Box(App->physics, 15, GetScreenHeight() - 250, this, wall_ver, EntityType::OBSTACLE, 0, false));
-	entities.emplace_back(new Box(App->physics, 100, GetScreenHeight() - 220, this, wall_ver, EntityType::OBSTACLE, 0, false));
-	entities.emplace_back(new Box(App->physics, -30, GetScreenHeight() - 80, this, wall_hor, EntityType::OBSTACLE, 0, false));
-	entities.emplace_back(new Box(App->physics, 85, GetScreenHeight() - 530, this, wall_ver, EntityType::OBSTACLE, 30, false));
+	entities.emplace_back(new Box(App->physics, 15, GetScreenHeight() - 250, this, wall_ver_t, EntityType::OBSTACLE, 0, false));
+	entities.emplace_back(new Box(App->physics, 100, GetScreenHeight() - 220, this, wall_ver_t, EntityType::OBSTACLE, 0, false));
+	entities.emplace_back(new Box(App->physics, -30, GetScreenHeight() - 80, this, wall_hor_t, EntityType::OBSTACLE, 0, false));
+	entities.emplace_back(new Box(App->physics, 85, GetScreenHeight() - 530, this, wall_ver_t, EntityType::OBSTACLE, 30, false));
+	
+	Box* flipperWallLeft = new Box(App->physics, GetScreenWidth() / 2 - 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::OBSTACLE, 30, false);
+	Box* flipperWallRight = new Box(App->physics, GetScreenWidth() / 2 + 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::OBSTACLE, 330, false);
+	entities.emplace_back(flipperWallLeft);
+	entities.emplace_back(flipperWallRight);
+	
+	b2Vec2 localAnchorLeft(PIXEL_TO_METERS(flipperWallLeft->body->width / 2), 0.f);
+	b2Vec2 localAnchorRight(-PIXEL_TO_METERS(flipperWallRight->body->width / 2), 0.f);
+	b2Vec2 worldAnchorLeft = flipperWallLeft->body->body->GetWorldPoint(localAnchorLeft);
+	b2Vec2 worldAnchorRight = flipperWallRight->body->body->GetWorldPoint(localAnchorRight);
+	b2Vec2 worldPixelLeft(METERS_TO_PIXELS(worldAnchorLeft.x), METERS_TO_PIXELS(worldAnchorLeft.y));
+	b2Vec2 worldPixelRight(METERS_TO_PIXELS(worldAnchorRight.x), METERS_TO_PIXELS(worldAnchorRight.y));
+	
+	flipperLeft = new Flipper(App->physics, this, flipper_left_t, flipperWallLeft, worldPixelLeft, true);
+	flipperRight = new Flipper(App->physics, this, flipper_right_t, flipperWallRight, worldPixelRight, false);
+	entities.emplace_back(flipperLeft);
+	entities.emplace_back(flipperRight);
 
 }
 
@@ -222,7 +276,7 @@ void ModuleGame::AddBalls(int ballCount)
 	int y = 400;
 	for (int i = 0; i < ballCount; i++)
 	{
-		balls.emplace_back(new Ball(App->physics, 45, GetScreenHeight() - y, this, ball, i));
+		balls.emplace_back(new Ball(App->physics, 45, GetScreenHeight() - y, this, ball_t, i));
 		y -= 80;
 	}
 	//currentBall = balls.size() - 1;

@@ -46,5 +46,7 @@ public:
 	Texture2D flipper_right_t;
 	std::vector<char> letters;
 	std::vector<char> requiredLetters;
+	int flipperFX;
+	int gameMusic;
 
 };

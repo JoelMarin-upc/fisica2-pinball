@@ -240,12 +240,14 @@ bool ModuleGame::Start()
 {
 	LOG("Loading Intro assets");
 	bool ret = true;
+	App->audio->PlayMusic("Assets/music/gameMusic.wav");
 
 	ball_t = LoadTexture("Assets/wheel.png");
 	wall_ver_t = LoadTexture("Assets/wall_vertical.png");
 	wall_hor_t = LoadTexture("Assets/wall_horizontal.png");
 	flipper_left_t = LoadTexture("Assets/flipper_left.png");
 	flipper_right_t = LoadTexture("Assets/flipper_right.png");
+	flipperFX = App->audio->LoadFx("Assets/FX/flipper.wav") - 1;
 	CreateMap();
 	AddBalls(startingBalls);
 
@@ -256,6 +258,7 @@ bool ModuleGame::Start()
 bool ModuleGame::CleanUp()
 {
 	LOG("Unloading Intro scene");
+	
 
 	return true;
 }
@@ -270,10 +273,13 @@ update_status ModuleGame::Update()
 
 	if (IsKeyDown(KEY_LEFT)) {
 		flipperLeft->body->ApplyImpulse(0.f, -10.f);
+		App->audio->PlayFx(flipperFX);
 	}
 
 	if (IsKeyDown(KEY_RIGHT)) {
 		flipperRight->body->ApplyImpulse(0.f, -10.f);
+		App->audio->PlayFx(flipperFX);
+		
 	}
 
 	if (CheckBonus()) {

@@ -43,5 +43,6 @@ public:
 	Texture2D flipper_left_t;
 	Texture2D flipper_right_t;
 	int flipperFX;
+	int gameMusic;
 
 };

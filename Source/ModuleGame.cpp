@@ -293,7 +293,7 @@ void ModuleGame::CreateMap()
 
 }
 
-void ModuleGame::AddBalls(int ballCount)
+void ModuleGame::AddBalls(int ballCount, int firstId)
 {
 	int y = 400;
 	for (int i = 0; i < ballCount; i++)
@@ -314,4 +314,9 @@ Ball* ModuleGame::GetCurrentBall()
 		}
 	}
 	return nullptr;
+}
+
+bool ModuleGame::CheckBonus()
+{
+	return false;
 }

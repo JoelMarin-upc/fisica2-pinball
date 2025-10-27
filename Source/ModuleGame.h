@@ -42,5 +42,6 @@ public:
 	Texture2D wall_ver_t;
 	Texture2D flipper_left_t;
 	Texture2D flipper_right_t;
+	int flipperFX;
 
 };

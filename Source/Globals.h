@@ -39,3 +39,5 @@ enum update_status
 #define WIN_FULLSCREEN_DESKTOP false
 #define VSYNC				true
 #define TITLE "Physics 2D Playground"
+#define TARGET_FPS 60
+#define FRAME_TIME (1000.0f / TARGET_FPS) // in milliseconds

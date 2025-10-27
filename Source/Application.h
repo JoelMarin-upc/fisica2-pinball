@@ -40,8 +40,9 @@ public:
 	~Application();
 
 	bool Init();
-	update_status Update();
+	update_status Update();  
 	bool CleanUp();
+	int targetFPS = 60;
 
 private:
 

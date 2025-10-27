@@ -206,33 +206,49 @@ bool ModuleGame::CleanUp()
 }
 
 // Update: draw background
-update_status ModuleGame::Update()
+update_status ModuleGame::Update(double dt)
 {
-	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
-		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f - currentBall);
+	// Ball launch
+	if (!ballLaunched && IsKeyDown(KEY_SPACE))
+	{
+		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
 		ballLaunched = true;
 	}
 
-	if (IsKeyDown(KEY_LEFT)) {
+	// Flippers
+	if (IsKeyDown(KEY_LEFT))
+	{
 		flipperLeft->body->ApplyImpulse(0.f, -10.f);
 		App->audio->PlayFx(flipperFX);
 	}
 
-	if (IsKeyDown(KEY_RIGHT)) {
+	if (IsKeyDown(KEY_RIGHT))
+	{
 		flipperRight->body->ApplyImpulse(0.f, -10.f);
 		App->audio->PlayFx(flipperFX);
-		
 	}
 
-	for (PhysicEntity* entity : entities)
+	// Bonus / balls logic
+	if (CheckBonus())
 	{
-		entity->Update();
+		int newBalls = startingBalls - currentBall;
+		Ball* ball = nullptr;
+		for (int i = 0; i < balls.size(); i++)
+		{
+			if (balls[i]->ballNum == currentBall) ball = balls[i];
+			else delete balls[i];
+		}
+		balls.clear();
+		balls.push_back(ball);
+		AddBalls(newBalls, currentBall + 1);
 	}
+
+	// Update all entities (just update positions, no extra dt multiplication)
+	for (PhysicEntity* entity : entities)
+		entity->Update();
 
 	for (Ball* b : balls)
-	{
 		b->Update();
-	}
 
 	return UPDATE_CONTINUE;
 }

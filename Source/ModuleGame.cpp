@@ -37,8 +37,8 @@ public:
 class Circle : public PhysicEntity
 {
 public:
-	Circle(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true)
-		: PhysicEntity(physics->CreateCircle(_x, _y, _texture.height / 2, angle, dynamic), physics, _listener, type)
+	Circle(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true, float restitution = 0.f)
+		: PhysicEntity(physics->CreateCircle(_x, _y, _texture.height / 2, angle, dynamic, restitution), physics, _listener, type)
 		, texture(_texture)
 	{
 		body->type = type;
@@ -65,8 +65,37 @@ private:
 class Box : public PhysicEntity
 {
 public:
-	Box(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true)
-		: PhysicEntity(physics->CreateRectangle(_x, _y, _texture.width, _texture.height, angle, dynamic), physics, _listener, type)
+	Box(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true, float restitution = 0.f)
+		: PhysicEntity(physics->CreateRectangle(_x, _y, _texture.width, _texture.height, angle, dynamic, restitution), physics, _listener, type)
+		, texture(_texture)
+	{
+		body->type = type;
+	}
+
+	void Update() override
+	{
+		int x, y;
+		body->GetPhysicPosition(x, y);
+		DrawTexturePro(texture, Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
+			Rectangle{ (float)x, (float)y, (float)texture.width, (float)texture.height },
+			Vector2{ (float)texture.width / 2.0f, (float)texture.height / 2.0f }, body->GetRotation() * RAD2DEG, WHITE);
+	}
+
+	int RayHit(vec2<int> ray, vec2<int> mouse, vec2<float>& normal) override
+	{
+		return body->RayCast(ray.x, ray.y, mouse.x, mouse.y, normal.x, normal.y);;
+	}
+
+private:
+	Texture2D texture;
+
+};
+
+class Chain : public PhysicEntity
+{
+public:
+	Chain(ModulePhysics* physics, int _x, int _y, int* points, int size, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true, float restitution = 0.f)
+		: PhysicEntity(physics->CreateChain(_x, _y, points, size, angle, dynamic, restitution), physics, _listener, type)
 		, texture(_texture)
 	{
 		body->type = type;
@@ -123,11 +152,6 @@ public:
 		
 	}
 
-	/*void Update() override
-	{
-		
-	}*/
-
 	~Ball() {
 		auto pbody = body->body;
 		/*delete body;
@@ -158,10 +182,44 @@ public:
 		physics->CreateRevoluteJoint(body->body, attachTo->body->body, anchorPoint.x, anchorPoint.y, lowerAngle, upperAngle);
 	}
 
-	/*void Update() override
+public:
+
+};
+
+class ObstacleBox : public Box
+{
+public:
+	ObstacleBox(ModulePhysics* physics, int _x, int _y, float angle, Module* _listener, Texture2D _texture, float restitution)
+		: Box(physics, _x, _y, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution)
 	{
 
-	}*/
+	}
+
+public:
+
+};
+
+class ObstacleCircle : public Circle
+{
+public:
+	ObstacleCircle(ModulePhysics* physics, int _x, int _y, float angle, Module* _listener, Texture2D _texture, float restitution)
+		: Circle(physics, _x, _y, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution)
+	{
+
+	}
+
+public:
+
+};
+
+class ObstacleChain : public Chain
+{
+public:
+	ObstacleChain(ModulePhysics* physics, int _x, int _y, int* points, int size, float angle, Module* _listener, Texture2D _texture, float restitution, const char letter = NULL)
+		: Chain(physics, _x, _y, points, size, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution)
+	{
+		if (letter != NULL) body->letter = letter;
+	}
 
 public:
 
@@ -189,7 +247,7 @@ bool ModuleGame::Start()
 	flipper_left_t = LoadTexture("Assets/flipper_left.png");
 	flipper_right_t = LoadTexture("Assets/flipper_right.png");
 	CreateMap();
-	AddBalls(3);
+	AddBalls(startingBalls);
 
 	return ret;
 }
@@ -218,6 +276,18 @@ update_status ModuleGame::Update()
 		flipperRight->body->ApplyImpulse(0.f, -10.f);
 	}
 
+	if (CheckBonus()) {
+		int newBalls = startingBalls - currentBall;
+		Ball* ball;
+		for (int i = 0; i < balls.size(); i++) {
+			if (balls[i]->ballNum == currentBall) ball = balls[i];
+			else delete balls[i];
+		}
+		balls.clear();
+		balls.push_back(ball);
+		AddBalls(newBalls, currentBall + 1);
+	}
+
 	for (PhysicEntity* entity : entities)
 	{
 		entity->Update();
@@ -239,6 +309,9 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		currentBall++;
 		ballLaunched = false;
 	}
+	else if (bodyA->type == EntityType::BALL && bodyB->type == EntityType::OBSTACLE) {
+		if (bodyB->letter != NULL) letters.push_back(bodyB->letter);
+	}
 }
 
 void ModuleGame::CreateMap()
@@ -247,13 +320,13 @@ void ModuleGame::CreateMap()
 	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight() + 150, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
 	
 	// walls
-	entities.emplace_back(new Box(App->physics, 15, GetScreenHeight() - 250, this, wall_ver_t, EntityType::OBSTACLE, 0, false));
-	entities.emplace_back(new Box(App->physics, 100, GetScreenHeight() - 220, this, wall_ver_t, EntityType::OBSTACLE, 0, false));
-	entities.emplace_back(new Box(App->physics, -30, GetScreenHeight() - 80, this, wall_hor_t, EntityType::OBSTACLE, 0, false));
-	entities.emplace_back(new Box(App->physics, 85, GetScreenHeight() - 530, this, wall_ver_t, EntityType::OBSTACLE, 30, false));
+	entities.emplace_back(new Box(App->physics, 15, GetScreenHeight() - 250, this, wall_ver_t, EntityType::WALL, 0, false));
+	entities.emplace_back(new Box(App->physics, 100, GetScreenHeight() - 220, this, wall_ver_t, EntityType::WALL, 0, false));
+	entities.emplace_back(new Box(App->physics, -30, GetScreenHeight() - 80, this, wall_hor_t, EntityType::WALL, 0, false));
+	entities.emplace_back(new Box(App->physics, 85, GetScreenHeight() - 530, this, wall_ver_t, EntityType::WALL, 30, false));
 	
-	Box* flipperWallLeft = new Box(App->physics, GetScreenWidth() / 2 - 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::OBSTACLE, 30, false);
-	Box* flipperWallRight = new Box(App->physics, GetScreenWidth() / 2 + 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::OBSTACLE, 330, false);
+	Box* flipperWallLeft = new Box(App->physics, GetScreenWidth() / 2 - 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::WALL, 30, false);
+	Box* flipperWallRight = new Box(App->physics, GetScreenWidth() / 2 + 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::WALL, 330, false);
 	entities.emplace_back(flipperWallLeft);
 	entities.emplace_back(flipperWallRight);
 	
@@ -271,15 +344,14 @@ void ModuleGame::CreateMap()
 
 }
 
-void ModuleGame::AddBalls(int ballCount)
+void ModuleGame::AddBalls(int ballCount, int firstId)
 {
 	int y = 400;
 	for (int i = 0; i < ballCount; i++)
 	{
-		balls.emplace_back(new Ball(App->physics, 45, GetScreenHeight() - y, this, ball_t, i));
+		balls.emplace_back(new Ball(App->physics, 45, GetScreenHeight() - y, this, ball_t, i + firstId));
 		y -= 80;
 	}
-	//currentBall = balls.size() - 1;
 }
 
 Ball* ModuleGame::GetCurrentBall()
@@ -292,4 +364,9 @@ Ball* ModuleGame::GetCurrentBall()
 		}
 	}
 	return nullptr;
+}
+
+bool ModuleGame::CheckBonus()
+{
+	return false;
 }

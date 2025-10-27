@@ -21,6 +21,7 @@ enum EntityType {
 	BALL,
 	FLIPPER,
 	OBSTACLE,
+	WALL,
 	DEATHZONE
 };
 
@@ -44,6 +45,7 @@ public:
 	b2Body* body;
 	Module* listener;
 	EntityType type;
+	char letter = NULL;
 };
 
 // Module --------------------------------------
@@ -58,10 +60,10 @@ public:
 	update_status PostUpdate();
 	bool CleanUp();
 
-	PhysBody* CreateCircle(int x, int y, int radius, float angle = 0.f, bool dynamic = true);
-	PhysBody* CreateRectangle(int x, int y, int width, int height, float angle = 0.f, bool dynamic = true);
+	PhysBody* CreateCircle(int x, int y, int radius, float angle = 0.f, bool dynamic = true, float restitution = 0.f);
+	PhysBody* CreateRectangle(int x, int y, int width, int height, float angle = 0.f, bool dynamic = true, float restitution = 0.f);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height, float angle = 0.f, bool dynamic = true);
-	PhysBody* CreateChain(int x, int y, const int* points, int size, float angle = 0.f, bool dynamic = true);
+	PhysBody* CreateChain(int x, int y, const int* points, int size, float angle = 0.f, bool dynamic = true, float restitution = 0.f);
 	void CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int yAnchor, float lowerAngle, float upperAngle);
 	
 	void DestroyBody(b2Body* body);

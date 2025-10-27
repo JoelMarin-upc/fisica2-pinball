@@ -57,7 +57,7 @@ update_status ModulePhysics::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, bool dynamic)
+PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, bool dynamic, float restitution)
 {
 	b2BodyDef body;
 	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
@@ -72,6 +72,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, boo
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
+	fixture.restitution = restitution;
 
 	b->CreateFixture(&fixture);
 
@@ -85,7 +86,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, boo
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, float angle, bool dynamic)
+PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, float angle, bool dynamic, float restitution)
 {
 	b2BodyDef body;
 	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
@@ -101,6 +102,7 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, fl
 	b2FixtureDef fixture;
 	fixture.shape = &box;
 	fixture.density = 1.0f;
+	fixture.restitution = restitution;
 
 	b->CreateFixture(&fixture);
 
@@ -146,7 +148,7 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, float angle, bool dynamic)
+PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, float angle, bool dynamic, float restitution)
 {
 	b2BodyDef body;
 	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
@@ -169,6 +171,7 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, 
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
+	fixture.restitution = restitution;
 
 	b->CreateFixture(&fixture);
 

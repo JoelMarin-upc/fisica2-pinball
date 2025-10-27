@@ -25,15 +25,17 @@ public:
 	bool CleanUp();
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateMap();
-	void AddBalls(int ballCount);
+	void AddBalls(int ballCount, int firstId = 0);
 	Ball* GetCurrentBall();
+	bool CheckBonus();
 
 public:
 	std::vector<PhysicEntity*> entities;
 	std::vector<Ball*> balls;
 	int currentBall = 0;
 	bool ballLaunched = false;
-	
+	int startingBalls = 3;
+
 	Flipper* flipperLeft;
 	Flipper* flipperRight;
 
@@ -42,5 +44,7 @@ public:
 	Texture2D wall_ver_t;
 	Texture2D flipper_left_t;
 	Texture2D flipper_right_t;
+	std::vector<char> letters;
+	std::vector<char> requiredLetters;
 
 };

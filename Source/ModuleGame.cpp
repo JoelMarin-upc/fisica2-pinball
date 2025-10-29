@@ -285,8 +285,11 @@ update_status ModuleGame::Update()
 {
 	Ball* ball = GetCurrentBall();
 
-	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
+	if (IsKeyPressed(KEY_TAB)) {
+		letters = requiredLetters;
+	}
 
+	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
 		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
 		App->audio->PlayFx(saque1FX);
 		ballLaunched = true;
@@ -428,5 +431,9 @@ Ball* ModuleGame::GetCurrentBall()
 
 bool ModuleGame::CheckBonus()
 {
-	return false;
+	for (int i = 0; i < requiredLetters.size(); i++) {
+		if (std::find(letters.begin(), letters.end(), requiredLetters[i]) == letters.end()) return false;
+	}
+	letters = {};
+	return true;
 }

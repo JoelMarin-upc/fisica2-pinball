@@ -46,7 +46,7 @@ public:
 	Texture2D flipper_left_t;
 	Texture2D flipper_right_t;
 	std::vector<char> letters;
-	std::vector<char> requiredLetters;
+	std::vector<char> requiredLetters = {'b','a','l','l'};
 	int flipperFX;
 	int holeFX;
 	int points1FX;

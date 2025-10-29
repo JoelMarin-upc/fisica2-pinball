@@ -17,18 +17,18 @@ The project uses the Box2D v2.4.1 library to simulate realistic physics, and it 
 ## Controls
 
  ### Game controls
- - LEFT ARROW: Left flipper
- - RIGHT ARROW: Right flipper
- - DOWN ARROW: Bumper
+ - **LEFT ARROW**: Left flipper
+ - **RIGHT ARROW**: Right flipper
+ - **DOWN ARROW**: Bumper
  
  ### Debug controls
- - F1: Enables/Disables debug mode (Draws colliders, locks ball to mouse)
- - C: Enables/Disables physics
- - X: Increases gravity by 1 m/s^2
- - Z: Decreases gravity by 1 m/s^2
- - M: Increases restitution coefficient by 0.1
- - N: Decreases restitution coefficient by 0.1
- - TAB: Automatically triggers bonus
+ - **F1**: Enables/Disables debug mode (Draws colliders, locks ball to mouse)
+ - **C**: Enables/Disables physics
+ - **X**: Increases gravity by 1 m/s^2
+ - **Z**: Decreases gravity by 1 m/s^2
+ - **M**: Increases restitution coefficient by 0.1
+ - **N**: Decreases restitution coefficient by 0.1
+ - **TAB**: Automatically triggers bonus
 
 ## Developers
 

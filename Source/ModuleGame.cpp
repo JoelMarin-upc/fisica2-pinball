@@ -240,7 +240,7 @@ bool ModuleGame::Start()
 {
 	LOG("Loading Intro assets");
 	bool ret = true;
-	App->audio->PlayMusic("Assets/music/gameMusic.wav");
+	//App->audio->PlayMusic("Assets/music/gameMusic.ogg", 2.0f);
 
 	ball_t = LoadTexture("Assets/wheel.png");
 	wall_ver_t = LoadTexture("Assets/wall_vertical.png");
@@ -248,8 +248,15 @@ bool ModuleGame::Start()
 	flipper_left_t = LoadTexture("Assets/flipper_left.png");
 	flipper_right_t = LoadTexture("Assets/flipper_right.png");
 	flipperFX = App->audio->LoadFx("Assets/FX/flipper.wav") - 1;
+	saque1FX = App->audio->LoadFx("Assets/FX/saque1.mp3") - 1;
+	looseBallFX = App->audio->LoadFx("Assets/FX/hited.mp3") - 1;
+	gameMusic = App->audio->LoadFx("Assets/music/gameMusic.wav") - 1;
 	CreateMap();
 	AddBalls(startingBalls);
+
+
+	App->audio->PlayFx(gameMusic);
+	
 
 	return ret;
 }
@@ -279,7 +286,9 @@ update_status ModuleGame::Update()
 	Ball* ball = GetCurrentBall();
 
 	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
+
 		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
+		App->audio->PlayFx(saque1FX);
 		ballLaunched = true;
 	}
 
@@ -354,6 +363,8 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		balls.erase(balls.begin());
 		currentBall++;
 		ballLaunched = false;
+		App->audio->PlayFx(looseBallFX);
+
 	}
 	else if (bodyA->type == EntityType::BALL && bodyB->type == EntityType::OBSTACLE) {
 		if (bodyB->letter != NULL) letters.push_back(bodyB->letter);
@@ -364,6 +375,9 @@ void ModuleGame::CreateMap()
 {
 	// deathzone
 	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight() + 150, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, -300, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, -150, 0, 300, GetScreenHeight(), this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() + 150, 0, 300, GetScreenHeight(), this, EntityType::DEATHZONE, 0, false));
 	
 	// walls
 	entities.emplace_back(new Box(App->physics, 15, GetScreenHeight() - 250, this, wall_ver_t, EntityType::WALL, 0, false));

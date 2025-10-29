@@ -48,6 +48,13 @@ public:
 	std::vector<char> letters;
 	std::vector<char> requiredLetters;
 	int flipperFX;
+	int holeFX;
+	int points1FX;
+	int points2FX;
+	int points3FX;
+	int saque1FX;
+	int saque2FX;
+	int looseBallFX;
 	int gameMusic;
 
 };

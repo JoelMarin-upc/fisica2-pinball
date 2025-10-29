@@ -75,6 +75,8 @@ public:
 	void CleanUpDestructionQueue();
 
 	void ToggleDebug(b2Body* ball = nullptr);
+	void ChangeGravity(bool add);
+	void ChangeBounceCoefficient(bool add);
 	
 	b2Vec2 mousePos;
 

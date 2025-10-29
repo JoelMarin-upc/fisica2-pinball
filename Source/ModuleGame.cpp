@@ -307,6 +307,26 @@ update_status ModuleGame::Update()
 		App->physics->ToggleDebug(GetCurrentBall()->body->body);
 	}
 
+	if (IsKeyPressed(KEY_X)) {
+		App->physics->ChangeGravity(true);
+		LOG("Gravity increased by 1 m/s^2");
+	}
+
+	if (IsKeyPressed(KEY_Z)) {
+		App->physics->ChangeGravity(false);
+		LOG("Gravity decreased by 1 m/s^2");
+	}
+
+	if (IsKeyPressed(KEY_M)) {
+		App->physics->ChangeBounceCoefficient(true);
+		LOG("Bounce coefficients increased by 0.1");
+	}
+
+	if (IsKeyPressed(KEY_N)) {
+		App->physics->ChangeBounceCoefficient(false);
+		LOG("Bounce coefficients decreased by 0.1");
+	}
+
 	for (PhysicEntity* entity : entities)
 	{
 		entity->Update();

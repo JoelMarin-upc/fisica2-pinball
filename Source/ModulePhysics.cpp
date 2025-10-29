@@ -221,7 +221,7 @@ void ModulePhysics::CleanUpDestructionQueue()
 {
 	for (b2Body* body : bodiesToDestroy) {
 		if (body) {
-			if (mouseJoint->GetBodyB() == body) {
+			if (mouseJoint && mouseJoint->GetBodyB() == body) {
 				world->DestroyJoint(mouseJoint);
 				mouseJoint = nullptr;
 			}
@@ -240,6 +240,20 @@ void ModulePhysics::ToggleDebug(b2Body* ball)
 	if (debug && ball) {
 		CreateMouseJoint(ball, mousePos);
 	}
+	else if (mouseJoint) {
+		world->DestroyJoint(mouseJoint);
+		mouseJoint = nullptr;
+	}
+}
+
+void ModulePhysics::ChangeGravity(bool add)
+{
+	world->SetGravity(world->GetGravity() + b2Vec2(0, add ? 1 : -1));
+}
+
+void ModulePhysics::ChangeBounceCoefficient(bool add)
+{
+	float change = add ? .1f : -.1f;
 }
 
 // 
@@ -338,10 +352,6 @@ update_status ModulePhysics::PostUpdate()
 					 METERS_TO_PIXELS(mouseJoint->GetBodyB()->GetPosition().y),
 					 RED);
 		}
-	}
-	else if (mouseJoint) {
-		world->DestroyJoint(mouseJoint);
-		mouseJoint = nullptr;
 	}
 	
 	return UPDATE_CONTINUE;

@@ -276,6 +276,8 @@ update_status ModuleGame::PreUpdate()
 // Update: draw background
 update_status ModuleGame::Update()
 {
+	Ball* ball = GetCurrentBall();
+
 	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
 		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
 		ballLaunched = true;
@@ -291,20 +293,25 @@ update_status ModuleGame::Update()
 		App->audio->PlayFx(flipperFX);
 	}
 
-	if (CheckBonus() || IsKeyPressed(KEY_M)) {
+	if (CheckBonus()) {
 		int newBalls = balls.size();
-		Ball* ball;
+		Ball* b;
 		for (int i = 0; i < balls.size(); i++) {
-			if (balls[i]->ballNum == currentBall) ball = balls[i];
+			if (balls[i]->ballNum == currentBall) b = balls[i];
 			else delete balls[i];
 		}
 		balls.clear();
-		balls.push_back(ball);
+		balls.push_back(b);
 		AddBalls(newBalls, currentBall + 1);
 	}
 
 	if (IsKeyPressed(KEY_F1)) {
-		App->physics->ToggleDebug(GetCurrentBall()->body->body);
+		App->physics->ToggleDebug(ball->body->body);
+	}
+
+	if (IsKeyPressed(KEY_C)) {
+		App->physics->TogglePhysics();
+		LOG("Physics toggled");
 	}
 
 	if (IsKeyPressed(KEY_X)) {
@@ -318,13 +325,13 @@ update_status ModuleGame::Update()
 	}
 
 	if (IsKeyPressed(KEY_M)) {
-		App->physics->ChangeBounceCoefficient(true);
-		LOG("Bounce coefficients increased by 0.1");
+		App->physics->ChangeRestitution(ball->body->body, true);
+		LOG("Bounce coefficient of ball increased by 0.1");
 	}
 
 	if (IsKeyPressed(KEY_N)) {
-		App->physics->ChangeBounceCoefficient(false);
-		LOG("Bounce coefficients decreased by 0.1");
+		App->physics->ChangeRestitution(ball->body->body, false);
+		LOG("Bounce coefficient of ball decreased by 0.1");
 	}
 
 	for (PhysicEntity* entity : entities)

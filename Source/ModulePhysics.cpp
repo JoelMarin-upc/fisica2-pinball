@@ -14,6 +14,7 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 	ground = NULL;
 	mouseJoint = NULL;
 	debug = false;
+	gravityOn = true;
 }
 
 // Destructor
@@ -37,7 +38,7 @@ bool ModulePhysics::Start()
 
 update_status ModulePhysics::PreUpdate()
 {
-	world->Step(1.0f / 60.0f, 6, 2);
+	if (gravityOn) world->Step(1.0f / 60.0f, 6, 2);
 
 	for (b2Contact* c = world->GetContactList(); c; c = c->GetNext())
 	{
@@ -246,14 +247,26 @@ void ModulePhysics::ToggleDebug(b2Body* ball)
 	}
 }
 
-void ModulePhysics::ChangeGravity(bool add)
+void ModulePhysics::TogglePhysics()
 {
-	world->SetGravity(world->GetGravity() + b2Vec2(0, add ? 1 : -1));
+	gravityOn = !gravityOn;
 }
 
-void ModulePhysics::ChangeBounceCoefficient(bool add)
+void ModulePhysics::ChangeGravity(bool add)
+{
+	if (gravityOn) world->SetGravity(world->GetGravity() + b2Vec2(0, add ? 1 : -1));
+}
+
+void ModulePhysics::ChangeRestitution(b2Body* body, bool add)
 {
 	float change = add ? .1f : -.1f;
+	for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext()) {
+		float value = f->GetRestitution();
+		value += change;
+		if (value > 1.f) value = 1;
+		else if (value < 0) value = 0;
+		f->SetRestitution(value);
+	}
 }
 
 // 

@@ -75,14 +75,16 @@ public:
 	void CleanUpDestructionQueue();
 
 	void ToggleDebug(b2Body* ball = nullptr);
+	void TogglePhysics();
 	void ChangeGravity(bool add);
-	void ChangeBounceCoefficient(bool add);
+	void ChangeRestitution(b2Body* body, bool add);
 	
 	b2Vec2 mousePos;
 
 private:
 
 	bool debug;
+	bool gravityOn;
 	b2World* world;
 	b2Body* ground;
 	b2MouseJoint* mouseJoint;

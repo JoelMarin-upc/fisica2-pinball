@@ -289,7 +289,7 @@ update_status ModuleGame::Update()
 		letters = requiredLetters;
 	}
 
-	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
+	if (!ballLaunched && IsKeyDown(KEY_DOWN)) {
 		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
 		App->audio->PlayFx(saque1FX);
 		ballLaunched = true;
@@ -338,12 +338,12 @@ update_status ModuleGame::Update()
 
 	if (IsKeyPressed(KEY_M)) {
 		App->physics->ChangeRestitution(ball->body->body, true);
-		LOG("Bounce coefficient of ball increased by 0.1");
+		LOG("Restitution coefficient of ball increased by 0.1");
 	}
 
 	if (IsKeyPressed(KEY_N)) {
 		App->physics->ChangeRestitution(ball->body->body, false);
-		LOG("Bounce coefficient of ball decreased by 0.1");
+		LOG("Restitution coefficient of ball decreased by 0.1");
 	}
 
 	for (PhysicEntity* entity : entities)

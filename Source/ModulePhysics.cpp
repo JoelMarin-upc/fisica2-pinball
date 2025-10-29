@@ -189,6 +189,14 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, 
 	return pbody;
 }
 
+void ModulePhysics::Step(float dt)
+{
+	const int velocityIterations = 8;
+	const int positionIterations = 3;
+
+	world->Step(dt, velocityIterations, positionIterations);
+}
+
 void ModulePhysics::CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int yAnchor, float lowerAngle, float upperAngle)
 {
 	b2RevoluteJointDef jointDef;

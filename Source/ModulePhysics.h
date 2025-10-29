@@ -55,6 +55,8 @@ public:
 	ModulePhysics(Application* app, bool start_enabled = true);
 	~ModulePhysics();
 
+	void Step(float dt);
+
 	bool Start();
 	update_status PreUpdate();
 	update_status PostUpdate();

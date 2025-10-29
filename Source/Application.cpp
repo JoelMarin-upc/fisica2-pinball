@@ -47,6 +47,9 @@ bool Application::Init()
 {
 	bool ret = true;
 
+	SetTargetFPS(targetFPS);
+
+
 	// Call Init() in all modules
 	for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
 	{
@@ -71,34 +74,57 @@ update_status Application::Update()
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
+	// --- T-key toggle FPS ---
+	if (IsKeyPressed(KEY_T))
 	{
-		Module* module = *it;
-		if (module->IsEnabled())
-		{
-			ret = module->PreUpdate();
-		}
+		targetFPS = (targetFPS == 60) ? 30 : 60;
+		SetTargetFPS(targetFPS); // raylib caps FPS automatically
+		LOG("Target FPS switched to %d", targetFPS);
 	}
 
+	// --- Delta time ---
+	static double lastTime = GetTime(); // seconds
+	double currentTime = GetTime();
+	double dt = currentTime - lastTime; // seconds since last frame
+	lastTime = currentTime;
+
+	// --- Fixed timestep physics ---
+	static double accumulator = 0.0;
+	const float physicsStep = 1.0f / 60.0f; // 60 Hz fixed physics step
+	accumulator += dt;
+	while (accumulator >= physicsStep)
+	{
+		physics->Step(physicsStep);
+		accumulator -= physicsStep;
+	}
+
+	// --- Module updates ---
+
+	// PreUpdate
+	for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
+		if ((*it)->IsEnabled())
+			ret = (*it)->PreUpdate();
+
+	// Update
 	for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
 	{
 		Module* module = *it;
-		if (module->IsEnabled())
-		{
+		if (!module->IsEnabled()) continue;
+
+		// Only pass dt to game module
+		if (module == scene_intro)
+			ret = module->Update(dt);
+		else
 			ret = module->Update();
-		}
 	}
 
+	// PostUpdate
 	for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
-	{
-		Module* module = *it;
-		if (module->IsEnabled())
-		{
-			ret = module->PostUpdate();
-		}
-	}
+		if ((*it)->IsEnabled())
+			ret = (*it)->PostUpdate();
 
-	if (WindowShouldClose()) ret = UPDATE_STOP;
+	if (WindowShouldClose())
+		ret = UPDATE_STOP;
 
 	return ret;
 }

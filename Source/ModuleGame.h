@@ -22,7 +22,7 @@ public:
 
 	bool Start();
 	update_status PreUpdate();
-	update_status Update();
+	update_status Update(double dt);
 	bool CleanUp();
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateMap();

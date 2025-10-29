@@ -263,11 +263,21 @@ bool ModuleGame::CleanUp()
 	return true;
 }
 
+update_status ModuleGame::PreUpdate()
+{
+	int x = GetMouseX();
+	int y = GetMouseY();
+	b2Vec2 mousePos = b2Vec2(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	App->physics->mousePos = mousePos;
+
+	return UPDATE_CONTINUE;
+}
+
 // Update: draw background
 update_status ModuleGame::Update()
 {
 	if (!ballLaunched && IsKeyDown(KEY_SPACE)) {
-		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f - currentBall);
+		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
 		ballLaunched = true;
 	}
 
@@ -279,11 +289,10 @@ update_status ModuleGame::Update()
 	if (IsKeyDown(KEY_RIGHT)) {
 		flipperRight->body->ApplyImpulse(0.f, -10.f);
 		App->audio->PlayFx(flipperFX);
-		
 	}
 
-	if (CheckBonus()) {
-		int newBalls = startingBalls - currentBall;
+	if (CheckBonus() || IsKeyPressed(KEY_M)) {
+		int newBalls = balls.size();
 		Ball* ball;
 		for (int i = 0; i < balls.size(); i++) {
 			if (balls[i]->ballNum == currentBall) ball = balls[i];
@@ -292,6 +301,10 @@ update_status ModuleGame::Update()
 		balls.clear();
 		balls.push_back(ball);
 		AddBalls(newBalls, currentBall + 1);
+	}
+
+	if (IsKeyPressed(KEY_F1)) {
+		App->physics->ToggleDebug(GetCurrentBall()->body->body);
 	}
 
 	for (PhysicEntity* entity : entities)

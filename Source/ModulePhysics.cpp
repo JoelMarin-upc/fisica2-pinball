@@ -12,7 +12,8 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 {
 	world = NULL;
 	ground = NULL;
-	debug = true;
+	mouseJoint = NULL;
+	debug = false;
 }
 
 // Destructor
@@ -198,6 +199,19 @@ void ModulePhysics::CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int
 	world->CreateJoint(&jointDef);
 }
 
+void ModulePhysics::CreateMouseJoint(b2Body* body, b2Vec2 target)
+{
+	b2MouseJointDef mouseJointDef;
+
+	mouseJointDef.bodyA = ground;
+	mouseJointDef.bodyB = body;
+	mouseJointDef.target = target;
+	mouseJointDef.damping = 10.f;
+	mouseJointDef.stiffness = 100.f;
+	mouseJointDef.maxForce = 500.0f * body->GetMass();
+	mouseJoint = (b2MouseJoint*)world->CreateJoint(&mouseJointDef);
+}
+
 void ModulePhysics::DestroyBody(b2Body* body)
 {
 	if (body) bodiesToDestroy.push_back(body);
@@ -207,14 +221,25 @@ void ModulePhysics::CleanUpDestructionQueue()
 {
 	for (b2Body* body : bodiesToDestroy) {
 		if (body) {
+			if (mouseJoint->GetBodyB() == body) {
+				world->DestroyJoint(mouseJoint);
+				mouseJoint = nullptr;
+			}
 			auto pbody = (PhysBody*)body->GetUserData().pointer;
 			delete pbody;
 			body->GetUserData().pointer = 0;
 			world->DestroyBody(body);
-			std::cout << "object destroyed" << std::endl;
 		}
 	}
 	bodiesToDestroy.clear();
+}
+
+void ModulePhysics::ToggleDebug(b2Body* ball)
+{
+	debug = !debug;
+	if (debug && ball) {
+		CreateMouseJoint(ball, mousePos);
+	}
 }
 
 // 
@@ -222,10 +247,10 @@ update_status ModulePhysics::PostUpdate()
 {
 	
 
-	if (IsKeyPressed(KEY_F1))
+	/*if (IsKeyPressed(KEY_F1))
 	{
 		debug = !debug;
-	}
+	}*/
 
 	if (!debug)
 	{
@@ -304,8 +329,20 @@ update_status ModulePhysics::PostUpdate()
 				}
 			}
 		}
-	}
 
+		if (mouseJoint) {
+			mouseJoint->SetTarget(mousePos);
+			DrawLine(METERS_TO_PIXELS(mousePos.x),
+					 METERS_TO_PIXELS(mousePos.y),
+					 METERS_TO_PIXELS(mouseJoint->GetBodyB()->GetPosition().x),
+					 METERS_TO_PIXELS(mouseJoint->GetBodyB()->GetPosition().y),
+					 RED);
+		}
+	}
+	else if (mouseJoint) {
+		world->DestroyJoint(mouseJoint);
+		mouseJoint = nullptr;
+	}
 	
 	return UPDATE_CONTINUE;
 }

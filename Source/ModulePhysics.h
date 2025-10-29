@@ -65,7 +65,8 @@ public:
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height, float angle = 0.f, bool dynamic = true);
 	PhysBody* CreateChain(int x, int y, const int* points, int size, float angle = 0.f, bool dynamic = true, float restitution = 0.f);
 	void CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int yAnchor, float lowerAngle, float upperAngle);
-	
+	void CreateMouseJoint(b2Body* body, b2Vec2 target);
+
 	void DestroyBody(b2Body* body);
 
 	// b2ContactListener ---
@@ -73,10 +74,15 @@ public:
 
 	void CleanUpDestructionQueue();
 
+	void ToggleDebug(b2Body* ball = nullptr);
+	
+	b2Vec2 mousePos;
+
 private:
 
 	bool debug;
 	b2World* world;
 	b2Body* ground;
+	b2MouseJoint* mouseJoint;
 	std::vector<b2Body*> bodiesToDestroy;
 };

@@ -95,7 +95,7 @@ class Chain : public PhysicEntity
 {
 public:
 	Chain(ModulePhysics* physics, int _x, int _y, int* points, int size, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true, float restitution = 0.f)
-		: PhysicEntity(physics->CreateChain(_x, _y, points, size, angle, dynamic, restitution), physics, _listener, type)
+		: PhysicEntity(physics->CreateChain(_x - _texture.width / 2, _y - _texture.height / 2, points, size, angle, dynamic, restitution), physics, _listener, type)
 		, texture(_texture)
 	{
 		body->type = type;
@@ -106,7 +106,7 @@ public:
 		int x, y;
 		body->GetPhysicPosition(x, y);
 		DrawTexturePro(texture, Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
-			Rectangle{ (float)x, (float)y, (float)texture.width, (float)texture.height },
+			Rectangle{ (float)x + texture.width / 2, (float)y + texture.height / 2, (float)texture.width, (float)texture.height },
 			Vector2{ (float)texture.width / 2.0f, (float)texture.height / 2.0f }, body->GetRotation() * RAD2DEG, WHITE);
 	}
 
@@ -242,11 +242,22 @@ bool ModuleGame::Start()
 	bool ret = true;
 	//App->audio->PlayMusic("Assets/music/gameMusic.ogg", 2.0f);
 
-	ball_t = LoadTexture("Assets/wheel.png");
-	wall_ver_t = LoadTexture("Assets/wall_vertical.png");
-	wall_hor_t = LoadTexture("Assets/wall_horizontal.png");
-	flipper_left_t = LoadTexture("Assets/flipper_left.png");
-	flipper_right_t = LoadTexture("Assets/flipper_right.png");
+	// Textures
+	ball_t = LoadTexture("Assets/Textures/Pelota_8X.png");
+	wall_t = LoadTexture("Assets/Textures/wall.png");
+	flipper_left_t = LoadTexture("Assets/Textures/Alas_Izquierda.png");
+	flipper_right_t = LoadTexture("Assets/Textures/Alas_Derecha.png");
+	obstaculoDerecha_t = LoadTexture("Assets/Textures/Obstaculo_Derecha.png");
+	obstaculoIzquierda_t = LoadTexture("Assets/Textures/Obstaculo_Izquierda.png");
+	obstaculo1_t = LoadTexture("Assets/Textures/Obstaculo1.png");
+	obstaculo2_t = LoadTexture("Assets/Textures/Obstaculo2.png");
+	rebotaDragon_t = LoadTexture("Assets/Textures/Rebota_Dragon_.png");
+	rebotaFuego_t = LoadTexture("Assets/Textures/Rebota_Fuego.png");
+	rebotaHielo_t = LoadTexture("Assets/Textures/Rebota_Hielo.png");
+	rebotaRayo_t = LoadTexture("Assets/Textures/Rebota_Rayo.png");
+	fondo_t = LoadTexture("Assets/Textures/Pinball_fondo.png");
+
+	// Audios
 	flipperFX = App->audio->LoadFx("Assets/FX/flipper.wav") - 1;
 	saque1FX = App->audio->LoadFx("Assets/FX/saque1.mp3") - 1;
 	looseBallFX = App->audio->LoadFx("Assets/FX/hited.mp3") - 1;
@@ -376,35 +387,37 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 
 void ModuleGame::CreateMap()
 {
+	int screenWidth = GetScreenWidth();
+	int screenHeight = GetScreenHeight();
+	
 	// deathzone
 	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight() + 150, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
 	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, -300, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
 	entities.emplace_back(new BoxSensor(App->physics, -150, 0, 300, GetScreenHeight(), this, EntityType::DEATHZONE, 0, false));
 	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() + 150, 0, 300, GetScreenHeight(), this, EntityType::DEATHZONE, 0, false));
 	
-	// walls
-	entities.emplace_back(new Box(App->physics, 15, GetScreenHeight() - 250, this, wall_ver_t, EntityType::WALL, 0, false));
-	entities.emplace_back(new Box(App->physics, 100, GetScreenHeight() - 220, this, wall_ver_t, EntityType::WALL, 0, false));
-	entities.emplace_back(new Box(App->physics, -30, GetScreenHeight() - 80, this, wall_hor_t, EntityType::WALL, 0, false));
-	entities.emplace_back(new Box(App->physics, 85, GetScreenHeight() - 530, this, wall_ver_t, EntityType::WALL, 30, false));
+	// background
+	entities.emplace_back(new Chain(App->physics, screenWidth / 2, screenHeight / 2, Pinball_fondo, 210, this, fondo_t, EntityType::WALL, 0.f, false));
 	
-	Box* flipperWallLeft = new Box(App->physics, GetScreenWidth() / 2 - 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::WALL, 30, false);
-	Box* flipperWallRight = new Box(App->physics, GetScreenWidth() / 2 + 260, GetScreenHeight() - 160, this, wall_hor_t, EntityType::WALL, 330, false);
+	// obstacles
+	entities.emplace_back(new ObstacleChain(App->physics, screenWidth / 2, screenHeight / 2, Obstaculo2, 10, 0.f, this, obstaculo2_t, .9f));
+	
+	Box* flipperWallLeft = new Box(App->physics, GetScreenWidth() / 2 - 120, GetScreenHeight() - 120, this, wall_t, EntityType::WALL, 30, false);
+	Box* flipperWallRight = new Box(App->physics, GetScreenWidth() / 2 + 65, GetScreenHeight() - 120, this, wall_t, EntityType::WALL, 330, false);
 	entities.emplace_back(flipperWallLeft);
 	entities.emplace_back(flipperWallRight);
-	
+
 	b2Vec2 localAnchorLeft(PIXEL_TO_METERS(flipperWallLeft->body->width / 2), 0.f);
 	b2Vec2 localAnchorRight(-PIXEL_TO_METERS(flipperWallRight->body->width / 2), 0.f);
 	b2Vec2 worldAnchorLeft = flipperWallLeft->body->body->GetWorldPoint(localAnchorLeft);
 	b2Vec2 worldAnchorRight = flipperWallRight->body->body->GetWorldPoint(localAnchorRight);
 	b2Vec2 worldPixelLeft(METERS_TO_PIXELS(worldAnchorLeft.x), METERS_TO_PIXELS(worldAnchorLeft.y));
 	b2Vec2 worldPixelRight(METERS_TO_PIXELS(worldAnchorRight.x), METERS_TO_PIXELS(worldAnchorRight.y));
-	
+
 	flipperLeft = new Flipper(App->physics, this, flipper_left_t, flipperWallLeft, worldPixelLeft, true);
 	flipperRight = new Flipper(App->physics, this, flipper_right_t, flipperWallRight, worldPixelRight, false);
 	entities.emplace_back(flipperLeft);
 	entities.emplace_back(flipperRight);
-
 }
 
 void ModuleGame::AddBalls(int ballCount, int firstId)
@@ -412,7 +425,7 @@ void ModuleGame::AddBalls(int ballCount, int firstId)
 	int y = 400;
 	for (int i = 0; i < ballCount; i++)
 	{
-		balls.emplace_back(new Ball(App->physics, 45, GetScreenHeight() - y, this, ball_t, i + firstId));
+		balls.emplace_back(new Ball(App->physics, 800, GetScreenHeight() - y, this, ball_t, i + firstId));
 		y -= 80;
 	}
 }

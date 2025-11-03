@@ -37,8 +37,8 @@ public:
 	int currentBall = 0;
 	bool ballLaunched = false;
 	int startingBalls = 3;
-	int score;
-	int prevScore;
+	int score = 0;
+	int prevScore = 0;
 	bool lost = false;
 
 	Flipper* flipperLeft;

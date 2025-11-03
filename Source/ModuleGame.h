@@ -55,7 +55,7 @@ public:
 	Texture2D fondo_t;
 
 	std::vector<char> letters;
-	std::vector<char> requiredLetters = {'b','a','l','l'};
+	std::vector<char> requiredLetters = {'a','b','c','d'};
 	int flipperFX;
 	int holeFX;
 	int points1FX;

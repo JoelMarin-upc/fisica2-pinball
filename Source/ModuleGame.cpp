@@ -189,10 +189,10 @@ public:
 class ObstacleBox : public Box
 {
 public:
-	ObstacleBox(ModulePhysics* physics, int _x, int _y, float angle, Module* _listener, Texture2D _texture, float restitution)
+	ObstacleBox(ModulePhysics* physics, int _x, int _y, float angle, Module* _listener, Texture2D _texture, float restitution, const char letter = NULL)
 		: Box(physics, _x, _y, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution)
 	{
-
+		if (letter != NULL) body->letter = letter;
 	}
 
 public:
@@ -202,10 +202,10 @@ public:
 class ObstacleCircle : public Circle
 {
 public:
-	ObstacleCircle(ModulePhysics* physics, int _x, int _y, float angle, Module* _listener, Texture2D _texture, float restitution)
+	ObstacleCircle(ModulePhysics* physics, int _x, int _y, float angle, Module* _listener, Texture2D _texture, float restitution, const char letter = NULL)
 		: Circle(physics, _x, _y, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution)
 	{
-
+		if (letter != NULL) body->letter = letter;
 	}
 
 public:
@@ -301,18 +301,18 @@ update_status ModuleGame::Update()
 	}
 
 	if (!ballLaunched && IsKeyDown(KEY_DOWN)) {
-		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
+		GetCurrentBall()->body->ApplyImpulse(0.f, -3.f);
 		App->audio->PlayFx(saque1FX);
 		ballLaunched = true;
 	}
 
 	if (IsKeyDown(KEY_LEFT)) {
-		flipperLeft->body->ApplyImpulse(0.f, -10.f);
+		flipperLeft->body->ApplyImpulse(0.f, -2.f);
 		App->audio->PlayFx(flipperFX);
 	}
 
 	if (IsKeyDown(KEY_RIGHT)) {
-		flipperRight->body->ApplyImpulse(0.f, -10.f);
+		flipperRight->body->ApplyImpulse(0.f, -2.f);
 		App->audio->PlayFx(flipperFX);
 	}
 
@@ -391,21 +391,18 @@ void ModuleGame::CreateMap()
 	int screenHeight = GetScreenHeight();
 	
 	// deathzone
-	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, GetScreenHeight() + 150, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
-	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() / 2, -300, GetScreenWidth(), 300, this, EntityType::DEATHZONE, 0, false));
-	entities.emplace_back(new BoxSensor(App->physics, -150, 0, 300, GetScreenHeight(), this, EntityType::DEATHZONE, 0, false));
-	entities.emplace_back(new BoxSensor(App->physics, GetScreenWidth() + 150, 0, 300, GetScreenHeight(), this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, screenWidth / 2, screenHeight + 150, screenWidth, 300, this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, screenWidth / 2, -300, screenWidth, 300, this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, -150, 0, 300, screenHeight, this, EntityType::DEATHZONE, 0, false));
+	entities.emplace_back(new BoxSensor(App->physics, screenWidth + 150, 0, 300, screenHeight, this, EntityType::DEATHZONE, 0, false));
 	
 	// background
 	entities.emplace_back(new Chain(App->physics, screenWidth / 2, screenHeight / 2, Pinball_fondo, 210, this, fondo_t, EntityType::WALL, 0.f, false));
 	
-	// obstacles
-	entities.emplace_back(new ObstacleChain(App->physics, screenWidth / 2, screenHeight / 2, Obstaculo2, 10, 0.f, this, obstaculo2_t, .9f));
-	
-	Box* flipperWallLeft = new Box(App->physics, GetScreenWidth() / 2 - 120, GetScreenHeight() - 120, this, wall_t, EntityType::WALL, 30, false);
-	Box* flipperWallRight = new Box(App->physics, GetScreenWidth() / 2 + 65, GetScreenHeight() - 120, this, wall_t, EntityType::WALL, 330, false);
-	entities.emplace_back(flipperWallLeft);
+	/*Box* flipperWallLeft = new Box(App->physics, screenWidth / 2 - 105, screenHeight - 120, this, wall_t, EntityType::WALL, 30, false);
+	Box* flipperWallRight = new Box(App->physics, screenWidth / 2 + 42, screenHeight - 120, this, wall_t, EntityType::WALL, 330, false);
 	entities.emplace_back(flipperWallRight);
+	entities.emplace_back(flipperWallLeft);
 
 	b2Vec2 localAnchorLeft(PIXEL_TO_METERS(flipperWallLeft->body->width / 2), 0.f);
 	b2Vec2 localAnchorRight(-PIXEL_TO_METERS(flipperWallRight->body->width / 2), 0.f);
@@ -417,12 +414,30 @@ void ModuleGame::CreateMap()
 	flipperLeft = new Flipper(App->physics, this, flipper_left_t, flipperWallLeft, worldPixelLeft, true);
 	flipperRight = new Flipper(App->physics, this, flipper_right_t, flipperWallRight, worldPixelRight, false);
 	entities.emplace_back(flipperLeft);
+	entities.emplace_back(flipperRight);*/
+
+	// obstacles
+	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 + 60, screenHeight / 2 + 110, 0.f, this, rebotaDragon_t, .9f, 'a'));
+	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 + 45, screenHeight / 2 - 20, 0.f, this, rebotaFuego_t, .9f, 'b'));
+	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 30, 0.f, this, rebotaHielo_t, .9f, 'c'));
+	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 - 30, screenHeight / 2 - 70, 0.f, this, rebotaRayo_t, .9f, 'd'));
+	entities.emplace_back(new ObstacleChain(App->physics, screenWidth / 2 - 100, screenHeight / 2 - 50, Obstaculo1, 66, 0.f, this, obstaculo1_t, .0f));
+	entities.emplace_back(new ObstacleChain(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 140, Obstaculo2, 10, 0.f, this, obstaculo2_t, .0f));
+	ObstacleChain* flipperWallRight = new ObstacleChain(App->physics, screenWidth / 2 + 62, screenHeight - 140, Obstaculo_Derecha, 14, 0.f, this, obstaculoDerecha_t, .0f);
+	ObstacleChain* flipperWallLeft = new ObstacleChain(App->physics, screenWidth / 2 - 125, screenHeight - 140, Obstaculo_Izquierda, 14, 0.f, this, obstaculoIzquierda_t, 0.f);
+	entities.emplace_back(flipperWallRight);
+	entities.emplace_back(flipperWallLeft);
+
+	// flippers
+	flipperLeft = new Flipper(App->physics, this, flipper_left_t, flipperWallLeft, b2Vec2(539, 622), true);
+	flipperRight = new Flipper(App->physics, this, flipper_right_t, flipperWallRight, b2Vec2(677, 622), false);
+	entities.emplace_back(flipperLeft);
 	entities.emplace_back(flipperRight);
 }
 
 void ModuleGame::AddBalls(int ballCount, int firstId)
 {
-	int y = 400;
+	int y = 200;
 	for (int i = 0; i < ballCount; i++)
 	{
 		balls.emplace_back(new Ball(App->physics, 800, GetScreenHeight() - y, this, ball_t, i + firstId));

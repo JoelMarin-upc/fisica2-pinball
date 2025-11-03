@@ -444,10 +444,10 @@ void ModuleGame::CreateMap()
 	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 + 45, screenHeight / 2 - 20, 0.f, this, rebotaFuego_t, .9f, 'b'));
 	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 30, 0.f, this, rebotaHielo_t, .9f, 'c'));
 	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 - 30, screenHeight / 2 - 70, 0.f, this, rebotaRayo_t, .9f, 'd'));
-	entities.emplace_back(new ObstacleChain(App->physics, screenWidth / 2 - 100, screenHeight / 2 - 50, Obstaculo1, 66, 0.f, this, obstaculo1_t, .0f));
-	entities.emplace_back(new ObstacleChain(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 140, Obstaculo2, 10, 0.f, this, obstaculo2_t, .0f));
-	ObstacleChain* flipperWallRight = new ObstacleChain(App->physics, screenWidth / 2 + 62, screenHeight - 140, Obstaculo_Derecha, 14, 0.f, this, obstaculoDerecha_t, .0f);
-	ObstacleChain* flipperWallLeft = new ObstacleChain(App->physics, screenWidth / 2 - 125, screenHeight - 140, Obstaculo_Izquierda, 14, 0.f, this, obstaculoIzquierda_t, 0.f);
+	entities.emplace_back(new Chain(App->physics, screenWidth / 2 - 100, screenHeight / 2 - 50, Obstaculo1, 66, this, obstaculo1_t, EntityType::WALL, 0.f, false, .0f));
+	entities.emplace_back(new Chain(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 140, Obstaculo2, 10, this, obstaculo2_t, EntityType::WALL, 0.f, false, .0f));
+	Chain* flipperWallRight = new Chain(App->physics, screenWidth / 2 + 62, screenHeight - 140, Obstaculo_Derecha, 14, this, obstaculoDerecha_t, EntityType::WALL, 0.f, false, .0f);
+	Chain* flipperWallLeft = new Chain(App->physics, screenWidth / 2 - 125, screenHeight - 140, Obstaculo_Izquierda, 14, this, obstaculoIzquierda_t, EntityType::WALL, 0.f, false, 0.f);
 	entities.emplace_back(flipperWallRight);
 	entities.emplace_back(flipperWallLeft);
 

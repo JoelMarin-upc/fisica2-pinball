@@ -23,18 +23,23 @@ public:
 	bool Start();
 	update_status PreUpdate();
 	update_status Update(double dt);
+	update_status PostUpdate();
 	bool CleanUp();
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateMap();
 	void AddBalls(int ballCount, int firstId = 0);
 	Ball* GetCurrentBall();
 	bool CheckBonus();
+	void Lose();
 
 	std::vector<PhysicEntity*> entities;
 	std::vector<Ball*> balls;
 	int currentBall = 0;
 	bool ballLaunched = false;
 	int startingBalls = 3;
+	int score;
+	int prevScore;
+	bool lost = false;
 
 	Flipper* flipperLeft;
 	Flipper* flipperRight;
@@ -63,6 +68,7 @@ public:
 	int saque1FX;
 	int saque2FX;
 	int looseBallFX;
+	int gameOverFX;
 	int gameMusic;
 
 private:

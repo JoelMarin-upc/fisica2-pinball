@@ -85,13 +85,13 @@ bool ModuleRender::Draw(Texture2D texture, int x, int y, const Rectangle* sectio
 	return ret;
 }
 
-bool ModuleRender::DrawText(const char * text, int x, int y, Font font, int spacing, Color tint) const
+bool ModuleRender::DrawText(const char * text, int x, int y, Font font, int textSize, int spacing, Color tint) const
 {
     bool ret = true;
 
     Vector2 position = { (float)x, (float)y };
 
-    DrawTextEx(font, text, position, (float)font.baseSize, (float)spacing, tint);
+    DrawTextEx(font, text, position, textSize, (float)spacing, tint);
 
     return ret;
 }

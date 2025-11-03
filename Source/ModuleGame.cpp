@@ -263,6 +263,9 @@ bool ModuleGame::Start()
 	looseBallFX = App->audio->LoadFx("Assets/FX/hited.mp3") - 1;
 	gameOverFX = App->audio->LoadFx("Assets/FX/game-over.wav") - 1;
 	gameMusic = App->audio->LoadFx("Assets/music/gameMusic.wav") - 1;
+	points1FX = App->audio->LoadFx("Assets/FX/points1.mp3") - 1;
+	points2FX = App->audio->LoadFx("Assets/FX/points2.mp3") - 1;
+	points3FX = App->audio->LoadFx("Assets/FX/points3.mp3") - 1;
 	CreateMap();
 	AddBalls(startingBalls);
 
@@ -386,6 +389,9 @@ update_status ModuleGame::Update(double dt)
 
 update_status ModuleGame::PostUpdate()
 {
+	App->renderer->DrawText(TextFormat("Score: %2i", score), 10, 40, GetFontDefault(), 50, 5, PURPLE);
+	App->renderer->DrawText(TextFormat("Previous score: %2i", prevScore), 10, 90, GetFontDefault(), 20, 3, RED);
+
 	if (lost) {
 		lost = false;
 		Lose();
@@ -404,7 +410,28 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		if (balls.size() == 0) lost = true;
 	}
 	else if (bodyA->type == EntityType::BALL && bodyB->type == EntityType::OBSTACLE) {
-		if (bodyB->letter != NULL) letters.push_back(bodyB->letter);
+		if (bodyB->letter != NULL) { 
+			letters.push_back(bodyB->letter);
+
+			if (bodyB->letter == 'a') {
+				score = score + 50;
+				App->audio->PlayFx(points3FX);
+			}
+			if (bodyB->letter == 'b') {
+				score = score + 30;
+				App->audio->PlayFx(points2FX);
+			}
+			if (bodyB->letter == 'c') {
+				score = score + 10;
+				App->audio->PlayFx(points1FX);
+			}
+			if (bodyB->letter == 'd') {
+				score = score + 40;
+				App->audio->PlayFx(points2FX);
+				
+			}
+		
+		}
 	}
 }
 

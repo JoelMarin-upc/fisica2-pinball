@@ -261,6 +261,7 @@ bool ModuleGame::Start()
 	flipperFX = App->audio->LoadFx("Assets/FX/flipper.wav") - 1;
 	saque1FX = App->audio->LoadFx("Assets/FX/saque1.mp3") - 1;
 	looseBallFX = App->audio->LoadFx("Assets/FX/hited.mp3") - 1;
+	gameOverFX = App->audio->LoadFx("Assets/FX/game-over.wav") - 1;
 	gameMusic = App->audio->LoadFx("Assets/music/gameMusic.wav") - 1;
 	CreateMap();
 	AddBalls(startingBalls);
@@ -301,7 +302,7 @@ update_status ModuleGame::Update()
 	}
 
 	if (!ballLaunched && IsKeyDown(KEY_DOWN)) {
-		GetCurrentBall()->body->ApplyImpulse(0.f, -3.f);
+		GetCurrentBall()->body->ApplyImpulse(0.f, -2.f);
 		App->audio->PlayFx(saque1FX);
 		ballLaunched = true;
 	}
@@ -370,6 +371,15 @@ update_status ModuleGame::Update()
 	return UPDATE_CONTINUE;
 }
 
+update_status ModuleGame::PostUpdate()
+{
+	if (lost) {
+		lost = false;
+		Lose();
+	}
+	return UPDATE_CONTINUE;
+}
+
 void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
 	if (bodyA->type == EntityType::BALL && bodyB->type == EntityType::DEATHZONE) {
@@ -378,7 +388,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		currentBall++;
 		ballLaunched = false;
 		App->audio->PlayFx(looseBallFX);
-
+		if (balls.size() == 0) lost = true;
 	}
 	else if (bodyA->type == EntityType::BALL && bodyB->type == EntityType::OBSTACLE) {
 		if (bodyB->letter != NULL) letters.push_back(bodyB->letter);
@@ -464,4 +474,13 @@ bool ModuleGame::CheckBonus()
 	}
 	letters = {};
 	return true;
+}
+
+void ModuleGame::Lose()
+{
+	App->audio->PlayFx(gameOverFX);
+	currentBall = 0;
+	AddBalls(startingBalls);
+	prevScore = score;
+	score = 0;
 }

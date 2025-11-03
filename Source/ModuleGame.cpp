@@ -390,7 +390,9 @@ update_status ModuleGame::Update(double dt)
 update_status ModuleGame::PostUpdate()
 {
 	App->renderer->DrawText(TextFormat("Score: %2i", score), 10, 40, GetFontDefault(), 50, 5, PURPLE);
-	App->renderer->DrawText(TextFormat("Previous score: %2i", prevScore), 10, 90, GetFontDefault(), 20, 3, RED);
+	App->renderer->DrawText(TextFormat("Previous Score: %2i", prevScore), 10, 90, GetFontDefault(), 20, 3, RED);
+	App->renderer->DrawText(TextFormat("Best Score: %2i", bestScore), GetScreenWidth() - GetScreenWidth()/3, 40, GetFontDefault(), 50, 5, GOLD);
+	App->renderer->DrawText(TextFormat("Games Played: %2i", gamesPlayed), 10, 110, GetFontDefault(), 20, 3, DARKGRAY);
 
 	if (lost) {
 		lost = false;
@@ -521,6 +523,8 @@ void ModuleGame::Lose()
 	App->audio->PlayFx(gameOverFX);
 	currentBall = 0;
 	AddBalls(startingBalls);
+	if (score > bestScore) bestScore = score;
 	prevScore = score;
 	score = 0;
+	gamesPlayed++;
 }

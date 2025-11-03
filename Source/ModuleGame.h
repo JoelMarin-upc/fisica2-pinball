@@ -39,6 +39,8 @@ public:
 	int startingBalls = 3;
 	int score = 0;
 	int prevScore = 0;
+	int bestScore = 0;
+	int gamesPlayed = 0;
 	bool lost = false;
 
 	Flipper* flipperLeft;

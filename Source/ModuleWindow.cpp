@@ -23,8 +23,8 @@ bool ModuleWindow::Init()
 	bool resizable = WIN_RESIZABLE;
 	bool vsync = VSYNC;
 
-	width = SCREEN_WIDTH;
-	height = SCREEN_HEIGHT;
+	width = SCREEN_WIDTH/1.5f;
+	height = SCREEN_HEIGHT+1;
 
 	if (fullscreen == true) flags |= FLAG_FULLSCREEN_MODE;
 

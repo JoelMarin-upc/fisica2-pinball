@@ -24,7 +24,7 @@ bool ModuleWindow::Init()
 	bool vsync = VSYNC;
 
 	width = SCREEN_WIDTH/1.5f;
-	height = SCREEN_HEIGHT+1;
+	height = SCREEN_HEIGHT-2;
 
 	if (fullscreen == true) flags |= FLAG_FULLSCREEN_MODE;
 

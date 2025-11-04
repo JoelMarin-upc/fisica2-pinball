@@ -32,10 +32,10 @@ The project uses the Box2D v2.4.1 library to simulate realistic physics, and it 
 
 ## Developers
 
- - Biel Cadenas Benedicto - {Role(s)}
- - Pau Gallego Guerrero - {Role(s)}
- - David Alejandro García Castro - {Role(s)}
- - Joel Marin Lluset - {Role(s)}
+ - Biel Cadenas Benedicto
+ - Pau Gallego Guerrero
+ - David Alejandro García Castro
+ - Joel Marin Lluset
 
 ## License
 

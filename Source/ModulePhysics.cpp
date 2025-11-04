@@ -38,7 +38,7 @@ bool ModulePhysics::Start()
 
 update_status ModulePhysics::PreUpdate()
 {
-	if (gravityOn) world->Step(1.0f / 60.0f, 6, 2);
+	//if (gravityOn) world->Step(1.f / GetFPS(), 8, 3);
 
 	for (b2Contact* c = world->GetContactList(); c; c = c->GetNext())
 	{
@@ -63,6 +63,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, boo
 {
 	b2BodyDef body;
 	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
+	body.bullet = true;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
 	PhysBody* pbody = new PhysBody();
@@ -73,7 +74,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, boo
 	shape.m_radius = PIXEL_TO_METERS(radius);
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
-	fixture.density = 1.0f;
+	fixture.density = 5.0f;
 	fixture.restitution = restitution;
 
 	b->CreateFixture(&fixture);
@@ -150,7 +151,7 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, float angle, bool dynamic, float restitution)
+PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, float angle, bool dynamic, float restitution, bool reverse)
 {
 	b2BodyDef body;
 	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
@@ -169,6 +170,7 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size, 
 		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
 	}
 
+	if (reverse) std::reverse(p, p + size / 2);
 	shape.CreateLoop(p, size / 2);
 
 	b2FixtureDef fixture;
@@ -194,7 +196,7 @@ void ModulePhysics::Step(float dt)
 	const int velocityIterations = 8;
 	const int positionIterations = 3;
 
-	world->Step(dt, velocityIterations, positionIterations);
+	if (gravityOn) world->Step(dt, velocityIterations, positionIterations);
 }
 
 void ModulePhysics::CreateRevoluteJoint(b2Body* b1, b2Body* b2, int xAnchor, int yAnchor, float lowerAngle, float upperAngle)

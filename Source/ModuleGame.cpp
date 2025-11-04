@@ -94,8 +94,8 @@ private:
 class Chain : public PhysicEntity
 {
 public:
-	Chain(ModulePhysics* physics, int _x, int _y, int* points, int size, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true, float restitution = 0.f)
-		: PhysicEntity(physics->CreateChain(_x - _texture.width / 2, _y - _texture.height / 2, points, size, angle, dynamic, restitution), physics, _listener, type)
+	Chain(ModulePhysics* physics, int _x, int _y, int* points, int size, Module* _listener, Texture2D _texture, EntityType type, float angle = 0.f, bool dynamic = true, float restitution = 0.f, bool reverse = false)
+		: PhysicEntity(physics->CreateChain(_x - _texture.width / 2, _y - _texture.height / 2, points, size, angle, dynamic, restitution, reverse), physics, _listener, type)
 		, texture(_texture)
 	{
 		body->type = type;
@@ -215,8 +215,8 @@ public:
 class ObstacleChain : public Chain
 {
 public:
-	ObstacleChain(ModulePhysics* physics, int _x, int _y, int* points, int size, float angle, Module* _listener, Texture2D _texture, float restitution, const char letter = NULL)
-		: Chain(physics, _x, _y, points, size, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution)
+	ObstacleChain(ModulePhysics* physics, int _x, int _y, int* points, int size, float angle, Module* _listener, Texture2D _texture, float restitution, const char letter = NULL, bool reverse = false)
+		: Chain(physics, _x, _y, points, size, _listener, _texture, EntityType::OBSTACLE, angle, false, restitution, reverse)
 	{
 		if (letter != NULL) body->letter = letter;
 	}
@@ -305,19 +305,19 @@ update_status ModuleGame::Update(double dt)
 	}
 
 	if (!ballLaunched && IsKeyDown(KEY_DOWN)) {
-		GetCurrentBall()->body->ApplyImpulse(0.f, -2.f);
+		GetCurrentBall()->body->ApplyImpulse(0.f, -10.f);
 		App->audio->PlayFx(saque1FX);
 		ballLaunched = true;
 	}
 
 	// Flippers
 	if (IsKeyDown(KEY_LEFT)) {
-		flipperLeft->body->ApplyImpulse(0.f, -2.f);
+		flipperLeft->body->ApplyImpulse(0.f, -5.f);
 		App->audio->PlayFx(flipperFX);
 	}
 
 	if (IsKeyDown(KEY_RIGHT)) {
-		flipperRight->body->ApplyImpulse(0.f, -2.f);
+		flipperRight->body->ApplyImpulse(0.f, -5.f);
 		App->audio->PlayFx(flipperFX);
 	}
 
@@ -473,10 +473,10 @@ void ModuleGame::CreateMap()
 	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 + 45, screenHeight / 2 - 20, 0.f, this, rebotaFuego_t, .9f, 'b'));
 	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 30, 0.f, this, rebotaHielo_t, .9f, 'c'));
 	entities.emplace_back(new ObstacleCircle(App->physics, screenWidth / 2 - 30, screenHeight / 2 - 70, 0.f, this, rebotaRayo_t, .9f, 'd'));
-	entities.emplace_back(new Chain(App->physics, screenWidth / 2 - 100, screenHeight / 2 - 50, Obstaculo1, 66, this, obstaculo1_t, EntityType::WALL, 0.f, false, .0f));
-	entities.emplace_back(new Chain(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 140, Obstaculo2, 10, this, obstaculo2_t, EntityType::WALL, 0.f, false, .0f));
-	Chain* flipperWallRight = new Chain(App->physics, screenWidth / 2 + 62, screenHeight - 140, Obstaculo_Derecha, 14, this, obstaculoDerecha_t, EntityType::WALL, 0.f, false, .0f);
-	Chain* flipperWallLeft = new Chain(App->physics, screenWidth / 2 - 125, screenHeight - 140, Obstaculo_Izquierda, 14, this, obstaculoIzquierda_t, EntityType::WALL, 0.f, false, 0.f);
+	entities.emplace_back(new Chain(App->physics, screenWidth / 2 - 100, screenHeight / 2 - 50, Obstaculo1, 66, this, obstaculo1_t, EntityType::WALL, 0.f, false, .0f, true));
+	entities.emplace_back(new Chain(App->physics, screenWidth / 2 - 30, screenHeight / 2 + 140, Obstaculo2, 10, this, obstaculo2_t, EntityType::WALL, 0.f, false, .0f, true));
+	Chain* flipperWallRight = new Chain(App->physics, screenWidth / 2 + 62, screenHeight - 140, Obstaculo_Derecha, 14, this, obstaculoDerecha_t, EntityType::WALL, 0.f, false, .0f, true);
+	Chain* flipperWallLeft = new Chain(App->physics, screenWidth / 2 - 125, screenHeight - 140, Obstaculo_Izquierda, 14, this, obstaculoIzquierda_t, EntityType::WALL, 0.f, false, 0.f, false);
 	entities.emplace_back(flipperWallRight);
 	entities.emplace_back(flipperWallLeft);
 

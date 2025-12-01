@@ -146,17 +146,13 @@ private:
 class Ball : public Circle
 {
 public:
-	Ball(ModulePhysics* physics, int _x, int _y, Module* _listener, Texture2D _texture, int ballNum)
-		: Circle(physics, _x, _y, _listener, _texture, EntityType::BALL), ballNum(ballNum)
+	Ball(ModulePhysics* physics, int x, int y, Module* listener, Texture2D tex, int num)
+		: Circle(physics, x, y, listener, tex, EntityType::BALL, 0.f, true, 0.3f), ballNum(num) 
 	{
-		
 	}
 
 	~Ball() {
-		auto pbody = body->body;
-		/*delete body;
-		if (body) body = nullptr;*/
-		physics->DestroyBody(pbody);
+		if (body) { physics->DestroyBody(body->body); body = nullptr; }
 	}
 
 public:
@@ -321,18 +317,6 @@ update_status ModuleGame::Update(double dt)
 		App->audio->PlayFx(flipperFX);
 	}
 
-	if (CheckBonus()) {
-		int newBalls = balls.size();
-		Ball* b;
-		for (int i = 0; i < balls.size(); i++) {
-			if (balls[i]->ballNum == currentBall) b = balls[i];
-			else delete balls[i];
-		}
-		balls.clear();
-		balls.push_back(b);
-		AddBalls(newBalls, currentBall + 1);
-	}
-
 	if (IsKeyPressed(KEY_F1)) {
 		App->physics->ToggleDebug(ball->body->body);
 	}
@@ -435,6 +419,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		
 		}
 	}
+
 }
 
 void ModuleGame::CreateMap()

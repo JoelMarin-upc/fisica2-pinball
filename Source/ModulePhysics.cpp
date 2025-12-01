@@ -45,7 +45,7 @@ update_status ModulePhysics::PreUpdate()
 		if (c->GetFixtureA()->IsSensor() && c->IsTouching())
 		{
 			b2BodyUserData data1 = c->GetFixtureA()->GetBody()->GetUserData();
-			b2BodyUserData data2 = c->GetFixtureA()->GetBody()->GetUserData();
+			b2BodyUserData data2 = c->GetFixtureB()->GetBody()->GetUserData(); 
 
 			PhysBody* pb1 = (PhysBody*)data1.pointer;
 			PhysBody* pb2 = (PhysBody*)data2.pointer;
@@ -64,6 +64,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, float angle, boo
 	b2BodyDef body;
 	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.bullet = dynamic;
 
 	PhysBody* pbody = new PhysBody();
 	b2Body* b = world->CreateBody(&body);
